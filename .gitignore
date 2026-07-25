@@ -1,3 +1,10 @@
 node_modules
 dist
 .DS_Store
+.env
+.env.local
+.env.*.local
+*.log
+.turbo
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal

@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum OwnershipCategory {
+  PREFER_NOT_TO_DISCLOSE
+  WOMEN_OWNED
+  INDIGENOUS_OWNED
+  MINORITY_OWNED
+}
+
+enum WorkOrderPriority {
+  high
+  medium
+  low
+}
+
+enum WorkOrderStatus {
+  onsite
+  scheduled
+  pending
+  completed
+}
+
+enum InvoiceStatus {
+  pending
+  approved
+  paid
+  rejected
+}
+
+enum AccessRequestStatus {
+  pending
+  approved
+  denied
+}
+
+model Vendor {
+  id               String            @id
+  name             String
+  email            String            @unique
+  legalName        String
+  phone            String
+  street           String
+  city             String
+  province         String
+  postalCode       String
+  ownershipCategory OwnershipCategory @default(PREFER_NOT_TO_DISCLOSE)
+  diversityNotes   String            @default("")
+  initials         String            @default("")
+  status           String            @default("active")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  // Banking (read-only for this pass; change workflow out of scope)
+  paymentMethod              String  @default("EFT (Direct Deposit)")
+  institutionNumber          String  @default("")
+  transitNumber              String  @default("")
+  accountNumber              String  @default("")
+  pendingChangeRequested     Boolean @default(false)
+  pendingChangeRequestedDate String?
+
+  users           VendorUser[]
+  documents       ComplianceDoc[]
+  workOrders      WorkOrder[]
+  invoices        Invoice[]
+  accessRequests  AccessRequest[]
+}
+
+model VendorUser {
+  id          String   @id @default(cuid())
+  vendorId    String
+  clerkUserId String   @unique
+  role        String   @default("admin")
+  name        String
+  email       String
+  createdAt   DateTime @default(now())
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model ComplianceDoc {
+  id           String   @id @default(cuid())
+  vendorId     String
+  name         String
+  type         String
+  uploadedDate DateTime @default(now())
+  expiryDate   DateTime
+  fileName     String
+  fileSize     Int
+  fileUrl      String?
+  required     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model WorkOrder {
+  id          String            @id @default(cuid())
+  vendorId    String
+  location    String
+  serviceType String
+  priority    WorkOrderPriority
+  status      WorkOrderStatus
+  notToExceed Float
+  createdDate DateTime          @default(now())
+  completedAt DateTime?
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  vendorId        String
+  invoiceNumber   String
+  workOrderId     String
+  invoiceDate     DateTime
+  amountBeforeTax Float
+  hst             Float
+  total           Float
+  status          InvoiceStatus @default(pending)
+  notes           String        @default("")
+  submittedDate   DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+
+  vendor      Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  attachments InvoiceAttachment[]
+
+  @@unique([vendorId, invoiceNumber])
+  @@index([vendorId])
+  @@index([workOrderId])
+}
+
+model InvoiceAttachment {
+  id        String @id @default(cuid())
+  invoiceId String
+  fileName  String
+  fileSize  Int
+  fileUrl   String?
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model AccessRequest {
+  id            String              @id @default(cuid())
+  vendorId      String
+  requestedBy   String
+  role          String
+  status        AccessRequestStatus @default(pending)
+  requestedDate DateTime            @default(now())
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}

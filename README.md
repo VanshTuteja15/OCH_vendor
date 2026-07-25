@@ -1,57 +1,52 @@
-# OCH Vendor Portal — Working Prototype
+# OCH Vendor Portal
 
-A working, interactive prototype of the Ottawa Community Housing Vendor Portal, built with **React 18 + TypeScript + Vite + Tailwind CSS**.
+Full-stack vendor portal monorepo for the Ottawa Community Housing RFI demo.
 
-## Demo accounts
+## Structure
 
-| Vendor | Email | Password | MFA code |
-|---|---|---|---|
-| ACME Cleaning Co. | accounts@acmecleaning.ca | Acme2026! | 123456 |
-| Capital Elevator Services | ops@capitalelevator.ca | Capital2026! | 123456 |
-| NorthStar Landscaping | billing@northstarlandscape.ca | Northstar2026! | 123456 |
+```
+apps/web   React + Vite + Tailwind + Clerk + TanStack Query
+apps/api   Express + Prisma + Supabase Postgres + Clerk + Cloudinary
+docs/      Build brief and notes
+```
 
-Wrong email/password/MFA code shows real inline validation errors. Once logged in, you can also switch between the three demo vendors instantly from the sidebar (click "Logged in as ...") without re-authenticating — handy for demoing different compliance/invoice states side by side.
+## Prerequisites
 
-## What's functional
+- Node.js 20+
+- Supabase Postgres database (`DATABASE_URL` pooled + `DIRECT_URL` for migrations)
+- Clerk application (`VITE_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`)
+- Cloudinary account (`CLOUDINARY_URL`) — needed for file uploads
 
-- **Login** — real credential + 6-digit MFA validation against the demo accounts above.
-- **Dashboard** — live stats (active work orders, pending invoice totals, paid-this-month, compliance score) computed from real app state.
-- **Compliance Documents** — upload a real file (PDF/JPG/PNG); it's validated, added to the document list, and the compliance score / dashboard alerts update immediately. Expiry date determines status (Valid / Expiring Soon / Expired) automatically.
-- **Invoices** — full 4-step submission wizard: select a work order → enter amount (HST auto-calculated at 13%) → upload a real supporting file → review → submit. Submission is blocked app-wide whenever a required compliance document is expired, matching the real business rule.
-- **Company Profile** — edit and save company info; banking fields are locked and can only be changed via a "Request Banking Change" action that creates a pending-approval state (mirrors OCH's approval workflow).
-- **Access Requests** — approve/deny team member access requests.
-- **Work Orders** — full list view with the ability to jump straight into invoice submission for a given WO.
-
-All data is held in the browser via `localStorage` (through Zustand's persist middleware), so it survives page reloads but is private to your browser/device — there's no real backend, authentication server, or database behind this. Uploaded files are validated and their name/size are stored and displayed; file *contents* are not persisted to a server (there isn't one) since this is a front-end-only prototype.
-
-## Running it
+## Setup
 
 ```bash
 npm install
-npm run dev
+
+# API env
+cp apps/api/.env.example apps/api/.env
+# Web env
+cp apps/web/.env.example apps/web/.env
 ```
 
-Then open the printed local URL (typically http://localhost:5173).
-
-To produce a static production build:
+Fill in the env values, then:
 
 ```bash
-npm run build
-npm run preview
+# Generate Prisma client + run migrations + seed demo vendors
+npm run db:generate
+npm run db:migrate -- --name init
+npm run db:seed
+
+# Dev servers
+npm run dev:api   # http://localhost:4000
+npm run dev:web   # http://localhost:5173
 ```
 
-## Stack
+### Demo seed tip
 
-- React 18 + TypeScript
-- Vite
-- React Router v6
-- Zustand (with localStorage persistence)
-- Tailwind CSS
-- lucide-react icons
+Create a Clerk user with email `accounts@acmecleaning.ca` (or the other seeded vendor emails). On first login the API attaches that user to the seeded vendor so the dashboard is populated.
 
-## Known limitations (by design, as a prototype)
+## Deploy
 
-- No real backend, database, or auth provider — everything simulated client-side.
-- MFA always accepts `123456`; there's no real authenticator integration.
-- Uploaded file *content* isn't stored anywhere (no server) — only file metadata (name, size, type, dates).
-- Banking change requests never get "approved" by anyone — there's no OCH-side reviewer view in this build.
+- **Frontend:** Vercel — root/directory `apps/web`, set `VITE_CLERK_PUBLISHABLE_KEY` and `VITE_API_URL`
+- **Backend:** Railway or Render — directory `apps/api`, set `DATABASE_URL`, `DIRECT_URL`, `CLERK_SECRET_KEY`, `CLOUDINARY_URL`, `CORS_ORIGIN`
+- **Database:** Supabase Postgres
