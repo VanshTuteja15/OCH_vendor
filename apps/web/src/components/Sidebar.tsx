@@ -30,10 +30,10 @@ export function Sidebar() {
   let lastSection = '';
 
   return (
-    <div className="w-[220px] bg-och-blue flex flex-col flex-shrink-0">
-      <div className="px-[18px] pt-5 pb-4 border-b border-white/10">
+    <aside className="flex w-[232px] bg-gradient-to-b from-och-blue via-[#163550] to-[#102c45] flex-col flex-shrink-0 shadow-[8px_0_30px_rgba(16,44,69,0.12)]">
+      <div className="px-5 pt-6 pb-5 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-och-teal rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-och-teal rounded-xl shadow-[0_6px_18px_rgba(0,117,106,0.35)] flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
             </svg>
@@ -42,22 +42,23 @@ export function Sidebar() {
             <div className="text-[11px] font-bold text-white/50 tracking-wide uppercase">
               Ottawa Community Housing
             </div>
-            <div className="text-[13px] font-bold text-white">Vendor Portal</div>
+            <div className="font-display text-[14px] font-bold text-white">Vendor Portal</div>
           </div>
         </div>
       </div>
 
-      <div className="px-[18px] py-3.5 border-b border-white/[0.08]">
-        <div className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Logged in as</div>
-        <div className="text-[13px] font-semibold text-white">
+      <div className="mx-3 mt-3 rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-3.5">
+        <div className="text-[9px] font-bold text-white/40 uppercase tracking-[0.14em] mb-1.5">Vendor account</div>
+        <div className="text-[13px] font-semibold text-white truncate">
           {data?.vendorName ?? 'Loading…'}
         </div>
-        <div className="text-[11px] text-white/40">
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-white/45">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
           {data?.vendorId ?? '—'} · {data?.status ?? 'Active'}
         </div>
       </div>
 
-      <nav className="flex-1 px-2.5 py-3 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto">
         {navItems.map((item) => {
           const showSection = item.section !== lastSection;
           lastSection = item.section;
@@ -74,17 +75,17 @@ export function Sidebar() {
           return (
             <div key={item.to}>
               {showSection && (
-                <div className="text-[10px] font-bold text-white/35 uppercase tracking-wide px-2.5 pt-3 pb-1.5">
+                <div className="text-[9px] font-bold text-white/30 uppercase tracking-[0.16em] px-2.5 pt-4 pb-2">
                   {item.section}
                 </div>
               )}
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[12.5px] mb-0.5 transition-colors ${
+                  `group flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[12.5px] mb-1 transition-all ${
                     isActive
-                      ? 'bg-white/15 text-white font-semibold'
-                      : 'text-white/65 hover:bg-white/8 hover:text-white'
+                      ? 'bg-och-teal text-white font-semibold shadow-[0_5px_14px_rgba(0,117,106,0.28)]'
+                      : 'text-white/60 hover:bg-white/[0.08] hover:text-white'
                   }`
                 }
               >
@@ -106,6 +107,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-    </div>
+    </aside>
   );
 }

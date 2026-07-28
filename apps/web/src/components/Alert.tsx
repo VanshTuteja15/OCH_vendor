@@ -11,16 +11,16 @@ export function Alert({
   const isDanger = kind === 'danger';
   return (
     <div
-      className={`rounded-lg px-3.5 py-2.5 text-xs flex items-center gap-2.5 mb-3.5 ${
+      className={`rounded-xl px-4 py-3 text-xs leading-5 flex items-start gap-3 shadow-sm ${
         isDanger
-          ? 'bg-[#fdecea] border border-[#f5c6cb] text-[#7b1a13]'
-          : 'bg-[#fff8e1] border border-[#ffe082] text-[#6d4c00]'
+          ? 'bg-red-50 border border-red-200 text-red-900'
+          : 'bg-amber-50 border border-amber-200 text-amber-900'
       }`}
     >
       {isDanger ? (
-        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+        <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
       ) : (
-        <TriangleAlert className="w-4 h-4 flex-shrink-0" />
+        <TriangleAlert className="w-4 h-4 mt-0.5 flex-shrink-0" />
       )}
       <div>{children}</div>
     </div>

@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Upload, FileText, CheckCircle2, PartyPopper } from 'lucide-react';
+import { LockKeyhole, PartyPopper, ReceiptText } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Badge } from '../components/Badge';
 import { LoadingState, ErrorState } from '../components/LoadingState';
+import { PageIntro, SectionHeader } from '../components/ProductUI';
 import { useCreateInvoice, useVendorSummary } from '../api/hooks';
 import { useAppStore } from '../store/useAppStore';
-import { formatCurrency, formatBytes, generateId, hasExpiredRequiredDoc } from '../lib/utils';
-import type { InvoiceAttachment } from '../types';
+import { formatCurrency, generateId, hasExpiredRequiredDoc } from '../lib/utils';
 
-const steps = ['Select WO', 'Invoice Details', 'Upload & Review', 'Submit'];
+const steps = ['Select WO', 'Invoice Details', 'Review', 'Submit'];
 
 export function InvoiceNew() {
   const navigate = useNavigate();
@@ -17,7 +17,6 @@ export function InvoiceNew() {
   const { data, isLoading, isError, error } = useVendorSummary();
   const createInvoice = useCreateInvoice();
   const showToast = useAppStore((s) => s.showToast);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
   const [selectedWoId, setSelectedWoId] = useState(searchParams.get('wo') ?? '');
@@ -25,7 +24,6 @@ export function InvoiceNew() {
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
-  const [attachments, setAttachments] = useState<InvoiceAttachment[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const blocked = data ? hasExpiredRequiredDoc(data.documents) : false;
@@ -59,12 +57,6 @@ export function InvoiceNew() {
   const hst = amountNum * 0.13;
   const total = amountNum + hst;
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setAttachments((prev) => [...prev, { fileName: f.name, fileSize: f.size }]);
-  }
-
   function handleSubmitInvoice() {
     createInvoice.mutate(
       {
@@ -75,7 +67,7 @@ export function InvoiceNew() {
         hst,
         total,
         notes,
-        attachments,
+        attachments: [],
       },
       {
         onSuccess: () => {
@@ -89,8 +81,13 @@ export function InvoiceNew() {
 
   return (
     <Layout title="Submit Invoice">
+      <PageIntro
+        eyebrow="Billing"
+        title="Submit an invoice"
+        description="Link your invoice to an active work order, confirm the amount, and send it to OCH for review."
+      />
       {/* Stepper */}
-      <div className="flex items-center mb-5">
+      <div className="product-card flex items-center p-4">
         {steps.map((label, i) => {
           const num = i + 1;
           const state = submitted ? 'done' : num < step ? 'done' : num === step ? 'active' : 'pending';
@@ -129,7 +126,7 @@ export function InvoiceNew() {
       </div>
 
       {submitted ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm p-10 text-center max-w-lg mx-auto">
+        <div className="product-card p-10 text-center max-w-lg mx-auto">
           <div className="w-14 h-14 bg-och-teal-light rounded-full flex items-center justify-center mx-auto mb-4">
             <PartyPopper className="w-7 h-7 text-och-teal" />
           </div>
@@ -141,34 +138,32 @@ export function InvoiceNew() {
           <div className="flex gap-2 justify-center">
             <button
               onClick={() => navigate('/invoices')}
-              className="bg-och-teal hover:bg-och-teal-dark text-white text-sm font-semibold px-5 py-2.5 rounded-md"
+              className="btn-primary"
             >
               View All Invoices
             </button>
             <button
               onClick={() => navigate('/dashboard')}
-              className="border border-gray-300 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-md hover:bg-gray-50"
+              className="btn-secondary"
             >
               Back to Dashboard
             </button>
           </div>
         </div>
       ) : step === 1 ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-          <div className="px-4.5 py-3.5 border-b border-gray-200">
-            <div className="text-[13px] font-bold text-gray-900">Select a Work Order</div>
-          </div>
-          <div className="p-4.5 space-y-2">
+        <div className="product-card">
+          <SectionHeader title="Select a work order" description="Invoices must be linked to an active OCH work order" />
+          <div className="p-5 space-y-3">
             {data.workOrders
               .filter((w) => w.status !== 'completed')
               .map((wo) => (
                 <button
                   key={wo.id}
                   onClick={() => setSelectedWoId(wo.id)}
-                  className={`w-full text-left rounded-lg border-2 p-3.5 flex items-center justify-between transition-colors ${
+                  className={`w-full text-left rounded-xl border p-4 flex items-center justify-between transition-all ${
                     selectedWoId === wo.id
-                      ? 'border-och-teal bg-och-teal-light'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-och-teal bg-och-teal-light shadow-[0_6px_18px_rgba(0,117,106,0.1)]'
+                      : 'border-slate-200 hover:border-och-teal/30 hover:bg-slate-50'
                   }`}
                 >
                   <div>
@@ -183,25 +178,22 @@ export function InvoiceNew() {
                 </button>
               ))}
           </div>
-          <div className="px-4.5 pb-4.5">
+          <div className="px-5 pb-5">
             <button
               disabled={!selectedWoId}
               onClick={() => setStep(2)}
-              className="w-full justify-center bg-och-teal hover:bg-och-teal-dark disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors"
+              className="btn-primary w-full"
             >
               Continue →
             </button>
           </div>
         </div>
       ) : step === 2 ? (
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <div>
             {selectedWo && (
-              <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm mb-3.5">
-                <div className="px-4.5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-                  <div className="text-[13px] font-bold text-gray-900">Linked Work Order</div>
-                  <Badge kind="success">✓ Validated</Badge>
-                </div>
+              <div className="product-card mb-5">
+                <SectionHeader title="Linked work order" trailing={<Badge kind="success">✓ Validated</Badge>} />
                 <div className="p-4.5 grid grid-cols-2 gap-2.5 text-xs">
                   <div>
                     <div className="text-[10px] text-gray-400 uppercase mb-0.5">WO Number</div>
@@ -222,44 +214,42 @@ export function InvoiceNew() {
                 </div>
               </div>
             )}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-              <div className="px-4.5 py-3.5 border-b border-gray-200">
-                <div className="text-[13px] font-bold text-gray-900">Invoice Details</div>
-              </div>
-              <div className="p-4.5">
+            <div className="product-card">
+              <SectionHeader title="Invoice details" description="Enter the billing reference and approved amount" />
+              <div className="p-5">
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                    <label className="field-label">
                       Invoice Number
                     </label>
                     <input
                       value={invoiceNumber}
                       onChange={(e) => setInvoiceNumber(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                      className="field-control"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                    <label className="field-label">
                       Invoice Date
                     </label>
                     <input
                       type="date"
                       value={invoiceDate}
                       onChange={(e) => setInvoiceDate(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                      className="field-control"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                    <label className="field-label">
                       Amount (Before Tax)
                     </label>
                     <input
                       value={amount}
                       onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ''))}
                       placeholder="0.00"
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px] font-bold"
+                      className="field-control font-bold"
                     />
                     {selectedWo && amountNum > selectedWo.notToExceed && (
                       <div className="text-[11px] text-danger mt-1">
@@ -268,13 +258,13 @@ export function InvoiceNew() {
                     )}
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                    <label className="field-label">
                       HST (13%)
                     </label>
                     <input
                       readOnly
                       value={formatCurrency(hst)}
-                      className="w-full border border-gray-300 bg-gray-100 text-gray-500 rounded-md px-3 py-2 text-[13px]"
+                      className="field-control-locked"
                     />
                   </div>
                 </div>
@@ -286,51 +276,27 @@ export function InvoiceNew() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm h-fit">
-            <div className="px-4.5 py-3.5 border-b border-gray-200">
-              <div className="text-[13px] font-bold text-gray-900">Supporting Documents</div>
-            </div>
-            <div className="p-4.5">
-              <label
-                htmlFor="invoice-file"
-                className="border-2 border-dashed border-gray-300 rounded-lg p-4.5 text-center bg-gray-50 hover:border-och-teal hover:bg-och-teal-light cursor-pointer flex flex-col items-center gap-2 mb-3.5 block"
-              >
-                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <Upload className="w-4 h-4 text-gray-400" />
+          <div className="product-card h-fit">
+            <SectionHeader title="Review notes" description="Optional context for the OCH accounts team" trailing={<ReceiptText className="h-4 w-4 text-och-teal" />} />
+            <div className="p-5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-och-blue">
+                  <LockKeyhole className="h-4 w-4 text-och-teal" />
+                  Attachments unavailable
                 </div>
-                <div className="text-xs text-gray-700">Upload invoice PDF or supporting docs</div>
-                <div className="text-[11px] text-gray-400">PDF, JPG, or PNG</div>
-                <input
-                  id="invoice-file"
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={handleFile}
-                />
-              </label>
-
-              {attachments.map((a, i) => (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
-                  <div className="w-8 h-8 bg-och-teal-light rounded-md flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-och-teal" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold truncate">{a.fileName}</div>
-                    <div className="text-[11px] text-gray-400">{formatBytes(a.fileSize)}</div>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
-                </div>
-              ))}
+                <p className="mt-1.5 text-[11px] leading-4 text-slate-500">
+                  File uploads are intentionally out of scope for this release. You can submit invoice details without an attachment.
+                </p>
+              </div>
 
               <div className="mt-3.5 pt-3.5 border-t border-gray-100">
-                <div className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-2">
+                <div className="field-label mb-2">
                   Notes to OCH (optional)
                 </div>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-xs h-16 resize-none"
+                  className="field-control min-h-24 resize-y"
                   placeholder="Add any notes about this invoice..."
                 />
               </div>
@@ -338,14 +304,14 @@ export function InvoiceNew() {
               <div className="flex gap-2 mt-3.5">
                 <button
                   onClick={() => setStep(1)}
-                  className="border border-gray-300 text-gray-700 text-[13px] font-semibold px-4 py-2.5 rounded-md hover:bg-gray-50"
+                  className="btn-secondary"
                 >
                   ← Back
                 </button>
                 <button
-                  disabled={!amountNum || attachments.length === 0}
+                  disabled={!amountNum}
                   onClick={() => setStep(3)}
-                  className="flex-1 justify-center bg-och-teal hover:bg-och-teal-dark disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors"
+                  className="btn-primary flex-1"
                 >
                   Continue to Review →
                 </button>
@@ -354,10 +320,8 @@ export function InvoiceNew() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm max-w-2xl mx-auto">
-          <div className="px-4.5 py-3.5 border-b border-gray-200">
-            <div className="text-[13px] font-bold text-gray-900">Review & Submit</div>
-          </div>
+        <div className="product-card max-w-2xl mx-auto">
+          <SectionHeader title="Review & submit" description="Confirm the details before sending this invoice to OCH" />
           <div className="p-4.5 space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -374,7 +338,7 @@ export function InvoiceNew() {
               </div>
               <div>
                 <div className="text-[10px] text-gray-400 uppercase mb-0.5">Attachments</div>
-                <div>{attachments.length} file(s)</div>
+                <div>Not included</div>
               </div>
             </div>
             <div className="bg-och-teal-light rounded-md px-3.5 py-3 space-y-1">
@@ -400,14 +364,14 @@ export function InvoiceNew() {
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setStep(2)}
-                className="border border-gray-300 text-gray-700 text-[13px] font-semibold px-4 py-2.5 rounded-md hover:bg-gray-50"
+                className="btn-secondary"
               >
                 ← Back
               </button>
               <button
                 onClick={handleSubmitInvoice}
                 disabled={createInvoice.isPending}
-                className="flex-1 justify-center bg-och-teal hover:bg-och-teal-dark disabled:opacity-60 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors"
+                className="btn-primary flex-1"
               >
                 {createInvoice.isPending ? 'Submitting…' : 'Submit Invoice'}
               </button>

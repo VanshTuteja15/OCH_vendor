@@ -4,6 +4,7 @@ import { Layout } from '../components/Layout';
 import { Alert } from '../components/Alert';
 import { Badge } from '../components/Badge';
 import { LoadingState, ErrorState } from '../components/LoadingState';
+import { PageIntro, SectionHeader } from '../components/ProductUI';
 import { useVendorSummary } from '../api/hooks';
 import { formatCurrency, formatDate, hasExpiredRequiredDoc } from '../lib/utils';
 
@@ -32,23 +33,22 @@ export function Invoices() {
   const blocked = hasExpiredRequiredDoc(data.documents);
 
   return (
-    <Layout
-      title="Invoices"
-      actions={
+    <Layout title="Invoices">
+      <PageIntro
+        eyebrow="Billing"
+        title="Invoices"
+        description="Review payment status, totals, and the work order linked to every submission."
+        actions={
         <button
           onClick={() => !blocked && navigate('/invoices/new')}
           disabled={blocked}
-          className={`flex items-center gap-1.5 text-[11px] font-semibold px-3.5 py-1.5 rounded-md transition-colors ${
-            blocked
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-och-teal hover:bg-och-teal-dark text-white'
-          }`}
+          className="btn-primary"
         >
           {blocked ? <Lock className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
           New Invoice
         </button>
-      }
-    >
+        }
+      />
       {blocked && (
         <Alert kind="danger">
           <strong>Invoice submission is blocked.</strong> Renew your expired compliance document
@@ -59,28 +59,30 @@ export function Invoices() {
         </Alert>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-        <div className="px-4.5 py-3.5 border-b border-gray-200">
-          <div className="text-[13px] font-bold text-gray-900">All Invoices ({data.invoices.length})</div>
-        </div>
-        <table className="w-full text-xs">
+      <div className="product-card">
+        <SectionHeader
+          title={`All invoices (${data.invoices.length})`}
+          description="Amounts are shown in CAD and update from the OCH review workflow"
+        />
+        <div className="data-table-wrap">
+        <table className="data-table">
           <thead>
-            <tr className="bg-gray-50 text-[11px] font-bold text-gray-700 uppercase tracking-wide">
-              <th className="text-left px-4 py-2.5">Invoice #</th>
-              <th className="text-left px-4 py-2.5">Work Order</th>
-              <th className="text-left px-4 py-2.5">Date</th>
-              <th className="text-left px-4 py-2.5">Total</th>
-              <th className="text-left px-4 py-2.5">Status</th>
+            <tr>
+              <th>Invoice #</th>
+              <th>Work Order</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {data.invoices.map((inv) => (
-              <tr key={inv.id} className="border-b border-gray-100 last:border-0 hover:bg-och-teal-light/40">
-                <td className="px-4 py-3 font-semibold text-och-teal">{inv.invoiceNumber}</td>
-                <td className="px-4 py-3">{inv.workOrderId}</td>
-                <td className="px-4 py-3 text-gray-500">{formatDate(inv.invoiceDate)}</td>
-                <td className="px-4 py-3 font-medium">{formatCurrency(inv.total)}</td>
-                <td className="px-4 py-3">
+              <tr key={inv.id}>
+                <td className="font-bold text-och-teal">{inv.invoiceNumber}</td>
+                <td className="font-medium text-slate-700">{inv.workOrderId}</td>
+                <td className="text-slate-500">{formatDate(inv.invoiceDate)}</td>
+                <td className="font-bold text-och-blue">{formatCurrency(inv.total)}</td>
+                <td>
                   <Badge kind={statusBadge[inv.status]}>{statusLabel[inv.status]}</Badge>
                 </td>
               </tr>
@@ -94,6 +96,7 @@ export function Invoices() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </Layout>
   );

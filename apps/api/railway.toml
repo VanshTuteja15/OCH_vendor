@@ -3,6 +3,12 @@ builder = "NIXPACKS"
 buildCommand = "npm install && npx prisma generate && npm run build"
 
 [deploy]
-startCommand = "npx prisma migrate deploy && npm run start"
+# Migrations are applied from local/CI; start the API only.
+# Use Supabase pooler URL for DATABASE_URL so Railway can reach Postgres.
+startCommand = "npm run start"
 healthcheckPath = "/health"
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
+
+[env]
+NODE_ENV = "production"

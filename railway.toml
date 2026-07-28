@@ -1,0 +1,12 @@
+# Deploy the API service from this monorepo.
+# In Railway: set Root Directory to `apps/api` (or use the service config below).
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npm run db:generate && npm run build:api"
+
+[deploy]
+startCommand = "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && npm run start --workspace=apps/api"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"

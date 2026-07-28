@@ -6,6 +6,7 @@ import { StatCard } from '../components/StatCard';
 import { ComplianceRing } from '../components/ComplianceRing';
 import { Badge } from '../components/Badge';
 import { LoadingState, ErrorState } from '../components/LoadingState';
+import { PageIntro, SectionHeader } from '../components/ProductUI';
 import { useVendorSummary } from '../api/hooks';
 import {
   complianceScore,
@@ -62,6 +63,17 @@ export function Dashboard() {
 
   return (
     <Layout title="Dashboard">
+      <PageIntro
+        eyebrow="Vendor overview"
+        title={`Welcome back, ${data.vendorName}`}
+        description="A live view of your service activity, invoice status, and compliance standing with OCH."
+        actions={
+          <button onClick={() => navigate('/invoices/new')} className="btn-primary">
+            <FileText className="h-3.5 w-3.5" />
+            Submit invoice
+          </button>
+        }
+      />
       {expired && expiredDoc && (
         <Alert kind="danger">
           <strong>Action Required:</strong> Your {expiredDoc.name} expired on{' '}
@@ -80,7 +92,7 @@ export function Dashboard() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-4 gap-3.5 mb-4.5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           icon={<ClipboardList className="w-5 h-5 text-och-teal" />}
           iconBg="#e6f4f3"
@@ -111,18 +123,15 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3.5">
-        <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-          <div className="px-4.5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-            <div className="text-[13px] font-bold text-gray-900">Active Work Orders</div>
-            <button
-              onClick={() => navigate('/work-orders')}
-              className="text-[11px] font-semibold border border-gray-300 rounded-md px-2.5 py-1 hover:bg-gray-50"
-            >
-              View All
-            </button>
-          </div>
-          <table className="w-full text-xs">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="product-card">
+          <SectionHeader
+            title="Active work orders"
+            description="Current service activity requiring attention"
+            trailing={<button onClick={() => navigate('/work-orders')} className="btn-secondary !px-3 !py-1.5 !text-[11px]">View all</button>}
+          />
+          <div className="data-table-wrap">
+          <table className="data-table !min-w-[520px]">
             <thead>
               <tr className="bg-gray-50 text-[11px] font-bold text-gray-700 uppercase tracking-wide">
                 <th className="text-left px-3 py-2">WO #</th>
@@ -134,14 +143,14 @@ export function Dashboard() {
             <tbody>
               {activeWorkOrders.map((wo) => (
                 <tr key={wo.id} className="border-b border-gray-100 last:border-0 hover:bg-och-teal-light/40">
-                  <td className="px-3 py-2.5 font-semibold text-och-teal">{wo.id}</td>
-                  <td className="px-3 py-2.5">{wo.location}</td>
-                  <td className="px-3 py-2.5">
+                  <td className="font-semibold text-och-teal">{wo.id}</td>
+                  <td className="font-medium text-slate-700">{wo.location}</td>
+                  <td>
                     <Badge kind={priorityBadge[wo.priority]} dot>
                       {priorityLabel[wo.priority]}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td>
                     <Badge kind={statusBadge[wo.status]}>{statusLabel[wo.status]}</Badge>
                   </td>
                 </tr>
@@ -155,19 +164,16 @@ export function Dashboard() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-          <div className="px-4.5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-            <div className="text-[13px] font-bold text-gray-900">Compliance Overview</div>
-            <button
-              onClick={() => navigate('/compliance')}
-              className="text-[11px] font-semibold border border-gray-300 rounded-md px-2.5 py-1 hover:bg-gray-50"
-            >
-              Manage Docs
-            </button>
-          </div>
-          <div className="p-4.5">
+        <div className="product-card">
+          <SectionHeader
+            title="Compliance overview"
+            description="Required credentials and renewal status"
+            trailing={<button onClick={() => navigate('/compliance')} className="btn-secondary !px-3 !py-1.5 !text-[11px]">View documents</button>}
+          />
+          <div className="p-5">
             <div className="flex items-center gap-5">
               <ComplianceRing score={score} />
               <div className="flex-1">

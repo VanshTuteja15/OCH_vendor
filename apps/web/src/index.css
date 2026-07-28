@@ -4,10 +4,109 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #212529; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f3f6f7;
+  color: #18252d;
+  -webkit-font-smoothing: antialiased;
+}
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 3px; }
 
 .font-display { font-family: 'DM Sans', sans-serif; }
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-[1440px] space-y-5;
+  }
+
+  .page-intro {
+    @apply flex flex-col gap-3 rounded-2xl border border-och-teal/10 bg-gradient-to-r from-white via-white to-och-teal-light/60 px-5 py-4 shadow-[0_8px_30px_rgba(26,58,92,0.06)] sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .page-kicker {
+    @apply mb-1 text-[10px] font-bold uppercase tracking-[0.18em] text-och-teal;
+  }
+
+  .page-heading {
+    @apply font-display text-xl font-bold tracking-[-0.02em] text-och-blue;
+  }
+
+  .page-description {
+    @apply mt-1 max-w-2xl text-xs leading-5 text-slate-500;
+  }
+
+  .product-card {
+    @apply overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_28px_rgba(26,58,92,0.07)];
+  }
+
+  .section-header {
+    @apply flex min-h-[62px] items-center justify-between gap-4 border-b border-slate-100 bg-gradient-to-r from-och-teal-light/80 via-white to-white px-5 py-3.5;
+  }
+
+  .section-title {
+    @apply font-display text-sm font-bold tracking-[-0.01em] text-och-blue;
+  }
+
+  .section-description {
+    @apply mt-0.5 text-[11px] leading-4 text-slate-500;
+  }
+
+  .field-group {
+    @apply space-y-1.5;
+  }
+
+  .field-label {
+    @apply block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600;
+  }
+
+  .field-control {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-[13px] text-slate-800 shadow-sm outline-none transition duration-150 placeholder:text-slate-400 hover:border-slate-400 focus:border-och-teal focus:ring-4 focus:ring-och-teal/10;
+  }
+
+  .field-control-locked {
+    @apply w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-[13px] font-medium text-slate-500 shadow-inner;
+  }
+
+  .field-help {
+    @apply text-[10px] leading-4 text-slate-500;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-och-teal px-4 py-2.5 text-xs font-semibold text-white shadow-[0_5px_14px_rgba(0,117,106,0.22)] transition hover:-translate-y-px hover:bg-och-teal-dark hover:shadow-[0_7px_18px_rgba(0,117,106,0.28)] focus:outline-none focus:ring-4 focus:ring-och-teal/20 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-och-teal/40 hover:bg-och-teal-light/50 hover:text-och-teal-dark focus:outline-none focus:ring-4 focus:ring-och-teal/10 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .data-table-wrap {
+    @apply w-full overflow-x-auto;
+  }
+
+  .data-table {
+    @apply w-full min-w-[720px] text-xs;
+  }
+
+  .data-table thead tr {
+    @apply border-b border-slate-200 bg-slate-50/80;
+  }
+
+  .data-table th {
+    @apply px-5 py-3 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500;
+  }
+
+  .data-table td {
+    @apply px-5 py-3.5 text-slate-700;
+  }
+
+  .data-table tbody tr {
+    @apply border-b border-slate-100 transition-colors last:border-0 hover:bg-och-teal-light/35;
+  }
+
+  .locked-note {
+    @apply mt-3 flex items-start gap-2 rounded-lg border border-och-teal/15 bg-och-teal-light/60 px-3 py-2.5 text-[11px] leading-4 text-och-teal-dark;
+  }
+}

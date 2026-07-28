@@ -14,8 +14,12 @@
     "build:web": "npm run build --workspace=apps/web",
     "build:api": "npm run build --workspace=apps/api",
     "lint": "npm run lint --workspace=apps/web",
+    "test:e2e:live": "node apps/web/scripts/live-e2e.mjs",
     "db:migrate": "npm run db:migrate --workspace=apps/api",
     "db:seed": "npm run db:seed --workspace=apps/api",
     "db:generate": "npm run db:generate --workspace=apps/api"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.55.0"
   }
 }

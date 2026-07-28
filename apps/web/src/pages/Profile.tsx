@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Clock } from 'lucide-react';
+import { Pencil, Clock, Building2, Landmark } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Alert } from '../components/Alert';
 import { Badge } from '../components/Badge';
 import { LoadingState, ErrorState } from '../components/LoadingState';
+import { LockedCaption, PageIntro, SectionHeader } from '../components/ProductUI';
 import { useUpdateProfile, useVendorSummary } from '../api/hooks';
 import { useAppStore } from '../store/useAppStore';
 import { formatDate } from '../lib/utils';
@@ -31,17 +32,17 @@ export function Profile() {
     }
   }, [data?.profile]);
 
-  if (isLoading || !form) {
-    return (
-      <Layout title="Company Profile">
-        <LoadingState />
-      </Layout>
-    );
-  }
   if (isError || !data) {
     return (
       <Layout title="Company Profile">
         <ErrorState message={error instanceof Error ? error.message : 'Failed to load profile.'} />
+      </Layout>
+    );
+  }
+  if (isLoading || !form) {
+    return (
+      <Layout title="Company Profile">
+        <LoadingState />
       </Layout>
     );
   }
@@ -69,109 +70,114 @@ export function Profile() {
   }
 
   return (
-    <Layout
-      title="Company Profile"
-      actions={
+    <Layout title="Company Profile">
+      <PageIntro
+        eyebrow="Organization"
+        title="Company profile"
+        description="Keep your business identity, contact information, and voluntary supplier-diversity details current."
+        actions={
         <div className="flex gap-2">
           <button
             onClick={handleCancel}
             disabled={!dirty}
-            className="border border-gray-300 text-gray-700 text-[11px] font-semibold px-3.5 py-1.5 rounded-md hover:bg-gray-50 disabled:opacity-40"
+            className="btn-secondary"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!dirty || updateProfile.isPending}
-            className="bg-och-teal hover:bg-och-teal-dark disabled:bg-gray-200 disabled:text-gray-400 text-white text-[11px] font-semibold px-3.5 py-1.5 rounded-md transition-colors"
+            className="btn-primary"
           >
             Save Changes
           </button>
         </div>
-      }
-    >
-      <div className="grid grid-cols-2 gap-3.5">
+        }
+      />
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <div>
-          <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-            <div className="px-4.5 py-3.5 border-b border-gray-200">
-              <div className="text-[13px] font-bold text-gray-900">Company Information</div>
-            </div>
-            <div className="p-4.5">
-              <div className="mb-3">
-                <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+          <div className="product-card">
+            <SectionHeader
+              title="Company information"
+              description="Primary legal identity and mailing address"
+              trailing={<Building2 className="h-4 w-4 text-och-teal" />}
+            />
+            <div className="space-y-5 p-5">
+              <div className="field-group">
+                <label className="field-label">
                   Legal Company Name
                 </label>
                 <input
                   value={form.legalName}
                   onChange={(e) => set('legalName', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                  className="field-control"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field-group">
+                  <label className="field-label">
                     Business Phone
                   </label>
                   <input
                     value={form.phone}
                     onChange={(e) => set('phone', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control"
                   />
                 </div>
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                <div className="field-group">
+                  <label className="field-label">
                     Primary Email
                   </label>
                   <input
                     value={form.email}
                     onChange={(e) => set('email', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control"
                   />
                 </div>
               </div>
 
-              <div className="text-xs font-bold text-och-teal uppercase tracking-wide pb-2 border-b-2 border-och-teal-light mb-3.5">
+              <div className="flex items-center gap-2 border-b border-och-teal/15 pb-2 font-display text-sm font-bold text-och-teal-dark">
                 Mailing Address
               </div>
-              <div className="mb-2.5">
-                <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="field-group">
+                <label className="field-label">
                   Street Address
                 </label>
                 <input
                   value={form.street}
                   onChange={(e) => set('street', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                  className="field-control"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="field-group">
+                  <label className="field-label">
                     City
                   </label>
                   <input
                     value={form.city}
                     onChange={(e) => set('city', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control"
                   />
                 </div>
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                <div className="field-group">
+                  <label className="field-label">
                     Province
                   </label>
                   <input
                     value={form.province}
                     onChange={(e) => set('province', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control"
                   />
                 </div>
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                <div className="field-group">
+                  <label className="field-label">
                     Postal Code
                   </label>
                   <input
                     value={form.postalCode}
                     onChange={(e) => set('postalCode', e.target.value)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control"
                   />
                 </div>
               </div>
@@ -180,12 +186,13 @@ export function Profile() {
         </div>
 
         <div>
-          <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm mb-3.5">
-            <div className="px-4.5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-              <div className="text-[13px] font-bold text-gray-900">Banking & Payment</div>
-              <Badge kind="warn">⚠ Requires OCH Approval</Badge>
-            </div>
-            <div className="p-4.5">
+          <div className="product-card mb-5">
+            <SectionHeader
+              title="Banking & payment"
+              description="Protected payment destination details"
+              trailing={<div className="flex items-center gap-2"><Badge kind="warn">Requires approval</Badge><Landmark className="h-4 w-4 text-och-teal" /></div>}
+            />
+            <div className="p-5">
               {data.banking.pendingChangeRequested ? (
                 <Alert kind="warn">
                   <div className="flex items-center gap-1.5">
@@ -204,57 +211,60 @@ export function Profile() {
                   effect.
                 </Alert>
               )}
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field-group">
+                  <label className="field-label">
                     Payment Method
                   </label>
                   <select
                     disabled
-                    className="w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control-locked"
                   >
                     <option>{data.banking.paymentMethod}</option>
                   </select>
                 </div>
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                <div className="field-group">
+                  <label className="field-label">
                     Institution Number
                   </label>
                   <input
                     disabled
                     value={data.banking.institutionNumber}
-                    className="w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control-locked"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-1">
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field-group">
+                  <label className="field-label">
                     Transit Number
                   </label>
                   <input
                     disabled
                     value={'•'.repeat(5)}
-                    className="w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control-locked tracking-[0.2em]"
                   />
                 </div>
-                <div>
-                  <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+                <div className="field-group">
+                  <label className="field-label">
                     Account Number
                   </label>
                   <input
                     disabled
                     value={'•'.repeat(10)}
-                    className="w-full border border-gray-300 bg-gray-100 text-gray-400 rounded-md px-3 py-2 text-[13px]"
+                    className="field-control-locked tracking-[0.2em]"
                   />
                 </div>
               </div>
+              <LockedCaption>
+                Locked — payment details require identity verification and written approval from OCH Procurement.
+              </LockedCaption>
               <button
                 onClick={() =>
                   showToast('Banking change requests are not available in this demo yet.', 'info')
                 }
                 disabled={data.banking.pendingChangeRequested}
-                className="mt-1 flex items-center gap-1.5 border border-gray-300 text-gray-700 text-[11px] font-semibold px-3 py-1.5 rounded-md hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-secondary mt-4"
               >
                 <Pencil className="w-3 h-3" />
                 {data.banking.pendingChangeRequested ? 'Request Pending' : 'Request Banking Change'}
@@ -262,39 +272,40 @@ export function Profile() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 shadow-card-sm">
-            <div className="px-4.5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-              <div className="text-[13px] font-bold text-gray-900">DEI Information</div>
-              <Badge kind="gray">Voluntary</Badge>
-            </div>
-            <div className="p-4.5">
-              <div className="text-xs text-gray-700 mb-3">
+          <div className="product-card">
+            <SectionHeader
+              title="Supplier diversity"
+              description="Voluntary information used for aggregate reporting"
+              trailing={<Badge kind="gray">Voluntary</Badge>}
+            />
+            <div className="p-5">
+              <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-600">
                 This information is collected voluntarily to support OCH's supplier diversity
                 reporting. It will not affect your eligibility or evaluation.
               </div>
-              <div className="mb-2.5">
-                <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="field-group">
+                <label className="field-label">
                   Business Ownership Category
                 </label>
                 <select
                   value={form.ownershipCategory}
                   onChange={(e) => set('ownershipCategory', e.target.value as OwnershipCategory)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-[13px]"
+                  className="field-control"
                 >
                   {OWNERSHIP_OPTIONS.map((o) => (
                     <option key={o}>{o}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wide mb-1.5 block">
+              <div className="field-group mt-4">
+                <label className="field-label">
                   Workforce Diversity Notes
                 </label>
                 <textarea
                   value={form.diversityNotes}
                   onChange={(e) => set('diversityNotes', e.target.value)}
                   placeholder="Optional..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-xs h-14 resize-none"
+                  className="field-control min-h-24 resize-y"
                 />
               </div>
             </div>

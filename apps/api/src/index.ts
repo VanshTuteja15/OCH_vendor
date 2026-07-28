@@ -39,6 +39,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(port, () => {
-  console.log(`OCH Vendor API listening on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`OCH Vendor API listening on 0.0.0.0:${port}`);
 });
